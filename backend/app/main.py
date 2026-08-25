@@ -62,30 +62,6 @@ def health():
     return {"status": "ok"}
 
 
-@app.get("/_debug/openai-connectivity")
-async def _debug_openai_connectivity():
-    import httpx
-
-    result = {"has_key": bool(os.environ.get("OPENAI_API_KEY"))}
-    try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.get(
-                "https://api.openai.com/v1/models",
-                headers={"Authorization": f"Bearer {os.environ.get('OPENAI_API_KEY', '')}"},
-            )
-        result["status_code"] = resp.status_code
-        result["body_snippet"] = resp.text[:300]
-    except Exception as exc:
-        result["exception_type"] = type(exc).__name__
-        result["exception_str"] = str(exc)
-        result["exception_repr"] = repr(exc)
-        cause = exc.__cause__
-        if cause:
-            result["cause_type"] = type(cause).__name__
-            result["cause_str"] = str(cause)
-    return result
-
-
 @app.get("/brands/{brand_id}/memory")
 def get_brand_memory(brand_id: str) -> list[MemoryEntry]:
     return memory.get_memory(brand_id)
